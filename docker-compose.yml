@@ -16,6 +16,18 @@ services:
       - "8501:8501"
     depends_on:
       - fastapi
+    volumes:
+      - logs_data:/data 
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse-config/users.d:/etc/clickhouse-server/users.d
+
 
   qdrant:
     image: qdrant/qdrant
@@ -24,3 +36,4 @@ services:
 
 volumes:
   logs_data:
+  clickhouse_data:
