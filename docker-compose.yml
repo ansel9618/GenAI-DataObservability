@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  fastapi:
+    build: ./fastapi_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - logs_data:/data
+    depends_on:
+      - qdrant
+
+  streamlit:
+    build: ./streamlit_app
+    ports:
+      - "8501:8501"
+    depends_on:
+      - fastapi
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+
+volumes:
+  logs_data:
