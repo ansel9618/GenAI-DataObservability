@@ -25,10 +25,17 @@ if st.button("Search Qdrant"):
         query_vector = model.encode(query).tolist()
         results = qdrant.search(collection_name="logs", query_vector=query_vector, limit=5)
 
-        for r in results:
-            st.markdown(f"**Message:** {r.payload.get('message')}")
-            st.text(f"Score: {r.score}")
-            st.json(r.payload)
+        if results:
+            records = []
+            for r in results:
+                row = r.payload.copy()
+                row["score"] = r.score
+                records.append(row)
+            
+            df = pd.DataFrame(records)
+            st.dataframe(df)
+        else:
+            st.info("No results found.")
     else:
         st.warning("Please enter a query first.")
 

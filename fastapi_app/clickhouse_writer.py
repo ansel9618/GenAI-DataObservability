@@ -10,31 +10,56 @@ def get_client():
         password="mysecret"  # Make sure this matches your config
     )
 
-# Ensure the logs table exists
 def create_logs_table(client):
     client.command("""
         CREATE TABLE IF NOT EXISTS logs (
             timestamp DateTime,
             level String,
             service String,
-            message String
+            job_name String,
+            step_name String,
+            pipeline_id String,
+            duration_ms UInt32,
+            records_processed UInt32,
+            records_failed UInt32,
+            status_code UInt16,
+            host String,
+            thread String,
+            environment String,
+            tags Array(String),
+            message String,
+            request_id String
         ) ENGINE = MergeTree()
         ORDER BY timestamp
     """)
 
-# Insert one log entry into the table
 def insert_log(client, log_entry):
-    # Convert timestamp string (ISO 8601) to datetime object
-    ts_str = log_entry["timestamp"]
-    ts_obj = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+    # Convert timestamp from string to datetime
+    ts = datetime.fromisoformat(log_entry["timestamp"].replace("Z", "+00:00"))
 
-    client.insert(
-        "logs",
-        [[
-            ts_obj,
-            log_entry["level"],
-            log_entry["service"],
-            log_entry["message"]
-        ]],
-        column_names=["timestamp", "level", "service", "message"]
-    )
+    # Insert all fields in the correct order
+    client.insert("logs", [[
+        ts,
+        log_entry.get("level", ""),
+        log_entry.get("service", ""),
+        log_entry.get("job_name", ""),
+        log_entry.get("step_name", ""),
+        log_entry.get("pipeline_id", ""),
+        int(log_entry.get("duration_ms", 0)),
+        int(log_entry.get("records_processed", 0)),
+        int(log_entry.get("records_failed", 0)),
+        int(log_entry.get("status_code", 0)),
+        log_entry.get("host", ""),
+        log_entry.get("thread", ""),
+        log_entry.get("environment", ""),
+        log_entry.get("tags", []),
+        log_entry.get("message", ""),
+        log_entry.get("request_id", "")
+    ]], column_names=[
+        "timestamp", "level", "service", "job_name", "step_name", "pipeline_id",
+        "duration_ms", "records_processed", "records_failed", "status_code",
+        "host", "thread", "environment", "tags", "message", "request_id"
+    ])
+
+
+
