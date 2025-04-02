@@ -1,4 +1,5 @@
 from qdrant_client import QdrantClient, models
+from qdrant_client.http.models import PointStruct
 import uuid
 
 client = QdrantClient(host="qdrant", port=6333)

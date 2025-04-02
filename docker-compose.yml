@@ -1,39 +1,35 @@
-version: '3.9'
-
 services:
-  fastapi:
-    build: ./fastapi_app
-    ports:
-      - "8000:8000"
-    volumes:
-      - logs_data:/data
-    depends_on:
-      - qdrant
-
   streamlit:
-    build: ./streamlit_app
+    build: ./streamlit
+    volumes:
+      - ./data:/data:ro
     ports:
       - "8501:8501"
     depends_on:
-      - fastapi
-    volumes:
-      - logs_data:/data 
+      - qdrant
 
-  clickhouse:
-    image: clickhouse/clickhouse-server:latest
+  fastapi:
+    build: ./fastapi
+    volumes:
+      - ./data:/data
     ports:
-      - "8123:8123"
-      - "9000:9000"
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-      - ./clickhouse-config/users.d:/etc/clickhouse-server/users.d
-
+      - "8000:8000"
+    depends_on:
+      - qdrant
 
   qdrant:
     image: qdrant/qdrant
     ports:
       - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  wal_processor:
+    build: ./background
+    volumes:
+      - ./data:/data
+    depends_on:
+      - fastapi  # ✅ optionally wait for FastAPI to start writing
 
 volumes:
-  logs_data:
-  clickhouse_data:
+  qdrant_data:

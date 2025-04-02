@@ -1,29 +1,32 @@
+
 import streamlit as st
+import duckdb
+import pandas as pd
 import requests
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
-import clickhouse_connect
-import pandas as pd #in case we want to manipulate data with pandas (most likely)
+import shutil
+import tempfile
 
-st.title("📊 Log Inspector")
+st.title("📊 Log Inspector (DuckDB + Qdrant)")
 
-# Initialize clients
+# Qdrant client for semantic search
 qdrant = QdrantClient(host="qdrant", port=6333)
 model = SentenceTransformer("all-MiniLM-L6-v2")
-client = clickhouse_connect.get_client(
-    host="clickhouse",
-    port=8123,
-    username="default",
-    password="mysecret"
-)
 
+temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".duckdb")
+shutil.copy2("/data/logs.duckdb", temp_file.name)
+
+# Step 2: Create an in-memory DuckDB and attach the copied DB file
+conn = duckdb.connect()
+conn.execute(f"ATTACH '{temp_file.name}' AS logs_db (READ_ONLY)")
 
 query = st.text_input("Ask a question about the logs")
 
 if st.button("Search Qdrant"):
     if query:
         query_vector = model.encode(query).tolist()
-        results = qdrant.search(collection_name="logs", query_vector=query_vector, limit=5)
+        results = qdrant.search(collection_name="logs", query_vector=query_vector, limit=30)
 
         if results:
             records = []
@@ -31,26 +34,21 @@ if st.button("Search Qdrant"):
                 row = r.payload.copy()
                 row["score"] = r.score
                 records.append(row)
-            
             df = pd.DataFrame(records)
             st.dataframe(df)
         else:
-            st.info("No results found.")
+            st.warning("No results found.")
     else:
         st.warning("Please enter a query first.")
 
-if st.button("Run SQL in ClickHouse"):
+if st.button("Run SQL in DuckDB"):
     try:
-        result = client.query("""
-            SELECT service, COUNT(*) AS errors
-            FROM logs
+        df = conn.execute("""
+            SELECT service, COUNT(*) AS errors 
+            FROM logs_db.logs
             WHERE level = 'ERROR'
             GROUP BY service
-        """)
-
-        # Manually build DataFrame (works on all versions)
-        df = pd.DataFrame(result.result_rows, columns=result.column_names)
-
+        """).fetchdf()
         st.bar_chart(df.set_index("service"))
-    except Exception as e:
-        st.error(f"ClickHouse query failed: {e}")
+    except Exception as err:
+        st.error(f"DuckDB query failed: {err}")
