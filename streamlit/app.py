@@ -12,7 +12,7 @@ st.title("📊 Log Inspector (DuckDB + Qdrant)")
 
 # Qdrant client for semantic search
 qdrant = QdrantClient(host="qdrant", port=6333)
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer("all-mpnet-base-v2")
 
 temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".duckdb")
 shutil.copy2("/data/logs.duckdb", temp_file.name)

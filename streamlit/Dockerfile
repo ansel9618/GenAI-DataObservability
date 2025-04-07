@@ -11,6 +11,7 @@ RUN pip install \
     pandas \
     sentence-transformers \
     qdrant-client \
-    duckdb
+    duckdb \
+    transformers==4.38.2
 
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

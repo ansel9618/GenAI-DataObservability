@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from embedding import embed_text
+from embedding import embed_log
 from qdrant_writer import store_vector
 from wal_writer import write_to_wal
 
@@ -26,8 +26,8 @@ class LogEntry(BaseModel):
 
 @app.post("/logs")
 def ingest_log(log: LogEntry):
-    embedding = embed_text(log.message)
     metadata = log.model_dump()
+    embedding = embed_log(metadata)
     store_vector(embedding, metadata)
     write_to_wal(metadata)
     return {"status": "ok"}
