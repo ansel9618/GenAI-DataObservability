@@ -1,4 +1,3 @@
-
 import streamlit as st
 import duckdb
 import pandas as pd
@@ -10,34 +9,59 @@ import tempfile
 
 st.title("📊 Log Inspector (DuckDB + Qdrant)")
 
-# Qdrant client for semantic search
+# Sidebar controls
+use_formatting = st.sidebar.toggle("🧠 Use Smart Query Formatting", value=True)
+score_threshold = st.sidebar.slider("🎯 Min Similarity Score", 0.0, 1.0, 0.4, 0.01)
+
+# Qdrant client and model
 qdrant = QdrantClient(host="qdrant", port=6333)
 model = SentenceTransformer("all-mpnet-base-v2")
 
+# Attach DuckDB (read-only snapshot)
 temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".duckdb")
 shutil.copy2("/data/logs.duckdb", temp_file.name)
-
-# Step 2: Create an in-memory DuckDB and attach the copied DB file
 conn = duckdb.connect()
 conn.execute(f"ATTACH '{temp_file.name}' AS logs_db (READ_ONLY)")
 
 query = st.text_input("Ask a question about the logs")
 
+def format_query(query: str) -> str:
+    return (
+        f"[?] ? | ? | ? > ? | {query} | "
+        f"status=?, duration=?, tags=?"
+    )
+
 if st.button("Search Qdrant"):
     if query:
-        query_vector = model.encode(query).tolist()
+        formatted_query = format_query(query) if use_formatting else query
+        query_vector = model.encode(formatted_query).tolist()
+
+        st.markdown("### 🔍 Query Debug Info")
+        st.text(f"Formatted query: {formatted_query}")
+        st.text(f"Vector length: {len(query_vector)}")
+        st.text(f"Preview: {query_vector[:5]}")
+
         results = qdrant.search(collection_name="logs", query_vector=query_vector, limit=30)
 
-        if results:
+        filtered_results = [r for r in results if r.score >= score_threshold]
+
+        if filtered_results:
+            st.markdown("### Qdrant Results (raw debug view)")
+            for r in filtered_results:
+                st.text(f"Score: {r.score:.2f}")
+                st.write(r.payload.get("message", "(No message found)"))
+
             records = []
-            for r in results:
+            for r in filtered_results:
                 row = r.payload.copy()
                 row["score"] = r.score
                 records.append(row)
+
             df = pd.DataFrame(records)
+            st.markdown("### Results Table")
             st.dataframe(df)
         else:
-            st.warning("No results found.")
+            st.warning("No results matched your threshold.")
     else:
         st.warning("Please enter a query first.")
 
