@@ -6,6 +6,7 @@ client = QdrantClient(host="qdrant", port=6333)
 COLLECTION = "logs"
 VECTOR_SIZE = 384 #384 for all-MiniLM-L6-v2, 768 for all-mpnet-base-v2
 
+# making sure the collection exists, if not create it
 def ensure_collection():
     if COLLECTION not in client.get_collections().collections:
         client.recreate_collection(
@@ -16,8 +17,10 @@ def ensure_collection():
             )
         )
 
+#call at FastAPI startup & import of qdrant_writer in main
 ensure_collection()
 
+# store vector
 def store_vector(embedding, metadata):
     point_id = str(uuid.uuid4())
     client.upsert(
