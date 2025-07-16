@@ -117,3 +117,8 @@ If you’re really scaling, tools like **Kafka**, **Redis Streams**, or **Rabbit
 
 
 --> WAL could be removed because not really necessary right now
+
+
+
+
+message = Rate limit almost exceeded  |  environment = dev  | status = WARN

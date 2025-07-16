@@ -1,6 +1,8 @@
 import duckdb
 from datetime import datetime
 
+# we don't need this when we use the write ahead log
+
 def get_connection():
     return duckdb.connect("/data/logs.duckdb")
 

@@ -29,5 +29,5 @@ def ingest_log(log: LogEntry):
     metadata = log.model_dump()
     embedding = embed_log(metadata)
     store_vector(embedding, metadata)
-    write_to_wal(metadata)
+    write_to_wal(metadata)  # writing to the Write ahead log. 
     return {"status": "ok"}

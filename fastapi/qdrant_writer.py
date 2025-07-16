@@ -4,7 +4,7 @@ import uuid
 
 client = QdrantClient(host="qdrant", port=6333)
 COLLECTION = "logs"
-VECTOR_SIZE = 768 #384 for all-MiniLM-L6-v2
+VECTOR_SIZE = 384 #384 for all-MiniLM-L6-v2, 768 for all-mpnet-base-v2
 
 def ensure_collection():
     if COLLECTION not in client.get_collections().collections:

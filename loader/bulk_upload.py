@@ -5,7 +5,7 @@ import os
 
 # Get path to current script directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
-jsonl_file = os.path.join(script_dir, "sample_logs.jsonl")
+jsonl_file = os.path.join(script_dir, "synthetic_pipeline_logs_daily.jsonl")
 
 # Load log entries from the JSONL file
 with open(jsonl_file, "r") as f:

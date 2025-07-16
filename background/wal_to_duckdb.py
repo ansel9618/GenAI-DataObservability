@@ -56,7 +56,8 @@ def run():
 
     while True:
         if WAL_PATH.exists():
-            with open(WAL_PATH, "r") as f_in, open(PROCESSED_PATH, "a") as f_out:
+            # This opens only a single wal file that is always the same, better would be here to read all files in the wal folder
+            with open(WAL_PATH, "r") as f_in, open(PROCESSED_PATH, "a") as f_out:  
                 for line in f_in:
                     try:
                         log = json.loads(line)
@@ -64,7 +65,8 @@ def run():
                         f_out.write(line)
                     except Exception as e:
                         print(f"Failed to process line: {line} — {e}")
-            WAL_PATH.unlink()
+            # this deletes the wal if successful or not. Implement logic here to store the not succesful ones. How to do retires?
+            WAL_PATH.unlink() 
         time.sleep(5)
 
 if __name__ == "__main__":

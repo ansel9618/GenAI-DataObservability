@@ -15,7 +15,8 @@ score_threshold = st.sidebar.slider("🎯 Min Similarity Score", 0.0, 1.0, 0.4, 
 
 # Qdrant client and model
 qdrant = QdrantClient(host="qdrant", port=6333)
-model = SentenceTransformer("all-mpnet-base-v2")
+model = SentenceTransformer("all-MiniLM-L6-v2")
+# model = SentenceTransformer("all-mpnet-base-v2")
 
 # Attach DuckDB (read-only snapshot)
 temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".duckdb")
@@ -27,8 +28,8 @@ query = st.text_input("Ask a question about the logs")
 
 def format_query(query: str) -> str:
     return (
-        f"[?] ? | ? | ? > ? | {query} | "
-        f"status=?, duration=?, tags=?"
+        f"| {query} "
+        f"| level | service | environment | job | step | message | status | duration | records_processed | records_failed | tags"
     )
 
 if st.button("Search Qdrant"):
@@ -46,10 +47,10 @@ if st.button("Search Qdrant"):
         filtered_results = [r for r in results if r.score >= score_threshold]
 
         if filtered_results:
-            st.markdown("### Qdrant Results (raw debug view)")
-            for r in filtered_results:
-                st.text(f"Score: {r.score:.2f}")
-                st.write(r.payload.get("message", "(No message found)"))
+            #st.markdown("### Qdrant Results (raw debug view)")
+            #for r in filtered_results:
+            #    st.text(f"Score: {r.score:.2f}")
+            #    st.write(r.payload.get("message", "(No message found)"))
 
             records = []
             for r in filtered_results:
