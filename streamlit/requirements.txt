@@ -3,3 +3,4 @@ pandas
 sentence-transformers
 qdrant-client
 duckdb
+transformers==4.38.2

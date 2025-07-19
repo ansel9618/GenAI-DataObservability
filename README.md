@@ -1,35 +1,24 @@
 # Quick helper
 
-# log into clickhouse container and run client
-docker compose exec clickhouse clickhouse-client
+# install duckdb in a container
+## 1. Install wget and unzip if missing
+apt-get update && apt-get install -y wget unzip
 
-# drop table
-DROP TABLE IF EXISTS logs;
+## 2. Download the DuckDB CLI binary
+wget https://github.com/duckdb/duckdb/releases/download/v0.10.2/duckdb_cli-linux-amd64.zip
 
-# recreate log table
-CREATE TABLE logs (
-    timestamp DateTime,
-    level String,
-    service String,
-    job_name String,
-    step_name String,
-    pipeline_id String,
-    duration_ms UInt32,
-    records_processed UInt32,
-    records_failed UInt32,
-    status_code UInt16,
-    host String,
-    thread String,
-    environment String,
-    tags Array(String),
-    message String,
-    request_id String
-) ENGINE = MergeTree()
-ORDER BY timestamp;
+## 3. Unzip the binary
+unzip duckdb_cli-linux-amd64.zip
 
-# check table structure and data
-DESCRIBE TABLE logs;
-DESCRIBE TABLE logs;
+## 4. Make it executable
+chmod +x duckdb
+
+## 5. Move it to /usr/local/bin so you can call it from anywhere
+mv duckdb /usr/local/bin/
+
+## 6. Clean up
+rm duckdb_cli-linux-amd64.zip
+
 
 # Docker path variable
 export PATH="$PATH:/Applications/Docker.app/Contents/Resources/bin"
