@@ -30,6 +30,7 @@ def insert_log(conn, log):
         log.get("message"),
         log.get("request_id", "")
     ])
+    conn.execute("CHECKPOINT")
 
 def run():
     conn = duckdb.connect(DB_PATH)
