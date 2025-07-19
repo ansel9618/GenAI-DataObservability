@@ -1,5 +1,6 @@
-# Ignore everything in the data folder
-data/*
+# Ignore the log and wal file for github
+data/logs.duckdb.wal
+data/wal.processed.jsonl
 
 # But keep the folder itself (empty folder trick)
 !data/.gitkeep

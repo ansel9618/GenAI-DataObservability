@@ -23,6 +23,7 @@ temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".duckdb")
 shutil.copy2("/data/logs.duckdb", temp_file.name)
 conn = duckdb.connect()
 conn.execute(f"ATTACH '{temp_file.name}' AS logs_db (READ_ONLY)")
+#conn.execute("ATTACH '/data/logs.duckdb' AS logs_db (READ_ONLY)")
 
 query = st.text_input("Ask a question about the logs")
 
