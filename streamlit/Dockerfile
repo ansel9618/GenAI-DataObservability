@@ -2,16 +2,11 @@
 FROM python:3.10-slim
 
 WORKDIR /app
+COPY requirements.txt .
+
+RUN apt-get update && apt-get install -y gcc build-essential && \
+    pip install --no-cache-dir -r requirements.txt
+
 COPY . .
-
-RUN apt-get update && apt-get install -y gcc build-essential
-
-RUN pip install \
-    streamlit \
-    pandas \
-    sentence-transformers \
-    qdrant-client \
-    duckdb \
-    transformers==4.38.2
 
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

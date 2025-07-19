@@ -1,0 +1,7 @@
+fastapi 
+uvicorn 
+sentence-transformers 
+qdrant-client 
+duckdb 
+pandas
+transformers==4.38.2

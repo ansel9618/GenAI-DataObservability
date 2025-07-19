@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("all-MiniLM-L6-v2") #all-MiniLM-L6-v2 has 384 dimensions, use all-mpnet-base-v2 with 768 dimensions as alternative (worse)
-
+# to use mpnet-base-v2 we need transformers==4.38.2 in the requirements file
 def embed_log(log: dict):
     summary = " | ".join([
         f"level={log['level']}",

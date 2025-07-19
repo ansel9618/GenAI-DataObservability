@@ -7,7 +7,8 @@ from sentence_transformers import SentenceTransformer
 import shutil
 import tempfile
 
-st.title("📊 Log Inspector (DuckDB + Qdrant)")
+st.set_page_config(layout="wide")
+st.title("📊 Log Inspector (Qdrant + DuckDB)")
 
 # Sidebar controls
 use_formatting = st.sidebar.toggle("🧠 Use Smart Query Formatting", value=True)
@@ -23,6 +24,7 @@ temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".duckdb")
 shutil.copy2("/data/logs.duckdb", temp_file.name)
 conn = duckdb.connect()
 conn.execute(f"ATTACH '{temp_file.name}' AS logs_db (READ_ONLY)")
+#conn.execute("ATTACH '/data/logs.duckdb' AS logs_db (READ_ONLY)")
 
 query = st.text_input("Ask a question about the logs")
 
@@ -59,6 +61,10 @@ if st.button("Search Qdrant"):
                 records.append(row)
 
             df = pd.DataFrame(records)
+
+            cols = ['score'] + [col for col in df.columns if col != 'score'] #bring the score column to the front
+            df = df[cols]
+
             st.markdown("### Results Table")
             st.dataframe(df)
         else:
@@ -77,3 +83,4 @@ if st.button("Run SQL in DuckDB"):
         st.bar_chart(df.set_index("service"))
     except Exception as err:
         st.error(f"DuckDB query failed: {err}")
+st.caption("ℹ️ Only works on Linux/macOS due to DuckDB file locking.")
