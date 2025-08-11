@@ -1,22 +1,22 @@
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer("all-MiniLM-L6-v2") #all-MiniLM-L6-v2 has 384 dimensions, use all-mpnet-base-v2 with 768 dimensions as alternative (worse)
+model = SentenceTransformer("all-MiniLM-L6-v2") #all-MiniLM-L6-v2 has 384 dimensions, 
+#use all-mpnet-base-v2 with 768 dimensions as alternative (worse)
 # to use mpnet-base-v2 we need transformers==4.38.2 in the requirements file
-def embed_log(log: dict):
-    summary = " | ".join([
-        f"level={log['level']}",
-        f"service={log['service']}",
-        f"env={log['environment']}",
-        f"job={log['job_name']}",
-        f"step={log['step_name']}",
-        f"message={log['message']}",
-        f"status={log['status_code']}",
-        f"duration={log['duration_ms']}ms",
-        f"tags={','.join(log.get('tags', []))}",
-    ])
-    return model.encode(summary).tolist()
+# def embed_log(log: dict):
+#     summary = " | ".join([
+#         f"level={log['level']}",
+#         f"service={log['service']}",
+#         f"env={log['environment']}",
+#         f"job={log['job_name']}",
+#         f"step={log['step_name']}",
+#         f"message={log['message']}",
+#         f"status={log['status_code']}",
+#         f"duration={log['duration_ms']}ms",
+#         f"tags={','.join(log.get('tags', []))}",
+#     ])
+#     return model.encode(summary).tolist()
 
-'''
 # more natural sentence
 def embed_log(log: dict):
     summary = (
@@ -28,4 +28,3 @@ def embed_log(log: dict):
     )
     return model.encode(summary).tolist()
 
-'''
